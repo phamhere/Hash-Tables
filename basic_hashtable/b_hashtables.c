@@ -116,10 +116,11 @@ void hash_table_remove(BasicHashTable *ht, char *key)
 {
   // getting storage index of key
   unsigned int index = hash(key, ht->capacity);
-  // if index exists in storage, free up the memory of the pair, the pair's key and pair's value
-  if (ht->storage[index])
+  // if the storage key matches the key argument at the index, destroy the pair there
+  if (strcmp(ht->storage[index]->key, key) == 0)
   {
     destroy_pair(ht->storage[index]);
+    ht->storage[index] = NULL;
   }
   // otherwise print an error
   else
@@ -144,6 +145,7 @@ char *hash_table_retrieve(BasicHashTable *ht, char *key)
   }
   else
   {
+    printf("%s\n", "returning null");
     return NULL;
   }
 }
@@ -160,6 +162,7 @@ void destroy_hash_table(BasicHashTable *ht)
   {
     if (ht->storage[i])
     {
+      printf("%d %s %s\n", i, ht->storage[i]->key, ht->storage[i]->value);
       destroy_pair(ht->storage[i]);
     }
   }
