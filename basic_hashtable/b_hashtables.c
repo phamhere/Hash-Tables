@@ -145,7 +145,6 @@ char *hash_table_retrieve(BasicHashTable *ht, char *key)
   }
   else
   {
-    printf("%s\n", "returning null");
     return NULL;
   }
 }
