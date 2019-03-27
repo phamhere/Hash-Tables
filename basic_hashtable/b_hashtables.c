@@ -88,6 +88,23 @@ BasicHashTable *create_hash_table(int capacity)
  ****/
 void hash_table_insert(BasicHashTable *ht, char *key, char *value)
 {
+  // creating a new pair with the key and value arguments
+  Pair *new_pair = create_pair(key, value);
+  // making the index by using the hashing function on the key
+  unsigned int index = hash(key, ht->capacity);
+  // checking if the ht->storage[index] already exists
+  if (ht->storage[index])
+  {
+    // if the stored key is different than the key argument, print a warning
+    if (strcmp(ht->storage[index]->key, key) != 0)
+    {
+      fprintf(stderr, "%s\n", "You are overwriting a value with a different key");
+    }
+    // destorying old pair to make room for the new pair
+    destroy_pair(ht->storage[index]);
+  }
+  // storing new pair into ht->storage
+  ht->storage[index] = new_pair;
 }
 
 /****
@@ -116,6 +133,7 @@ char *hash_table_retrieve(BasicHashTable *ht, char *key)
  ****/
 void destroy_hash_table(BasicHashTable *ht)
 {
+  // looping through ht->storage and destroying all pairs if they exist
   for (int i = 0; i < ht->capacity; i++)
   {
     if (ht->storage[i])
@@ -123,6 +141,7 @@ void destroy_hash_table(BasicHashTable *ht)
       destroy_pair(ht->storage[i]);
     }
   }
+  // freeing ht->storage and ht
   free(ht->storage);
   free(ht);
 }
