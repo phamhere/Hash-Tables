@@ -100,7 +100,7 @@ void hash_table_insert(BasicHashTable *ht, char *key, char *value)
     {
       fprintf(stderr, "%s\n", "You are overwriting a value with a different key");
     }
-    // destorying old pair to make room for the new pair
+    // destroying old pair to make room for the new pair
     destroy_pair(ht->storage[index]);
   }
   // storing new pair into ht->storage
@@ -114,6 +114,18 @@ void hash_table_insert(BasicHashTable *ht, char *key, char *value)
  ****/
 void hash_table_remove(BasicHashTable *ht, char *key)
 {
+  // getting storage index of key
+  unsigned int index = hash(key, ht->capacity);
+  // if index exists in storage, free up the memory of the pair, the pair's key and pair's value
+  if (ht->storage[index])
+  {
+    destroy_pair(ht->storage[index]);
+  }
+  // otherwise print an error
+  else
+  {
+    fprintf(stderr, "%s\n", "This key does not exist");
+  }
 }
 
 /****
@@ -123,7 +135,17 @@ void hash_table_remove(BasicHashTable *ht, char *key)
  ****/
 char *hash_table_retrieve(BasicHashTable *ht, char *key)
 {
-  return NULL;
+  // retrieving storage index of key
+  unsigned int index = hash(key, ht->capacity);
+  // if index exists in storage, return the value there, otherwise return null
+  if (ht->storage[index])
+  {
+    return ht->storage[index]->value;
+  }
+  else
+  {
+    return NULL;
+  }
 }
 
 /****
