@@ -161,7 +161,6 @@ void destroy_hash_table(BasicHashTable *ht)
   {
     if (ht->storage[i])
     {
-      printf("%d %s %s\n", i, ht->storage[i]->key, ht->storage[i]->value);
       destroy_pair(ht->storage[i]);
     }
   }

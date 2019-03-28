@@ -111,8 +111,7 @@ void hash_table_insert(HashTable *ht, char *key, char *value)
       // if the key at current_pair key is the same as the key arg, overwrite the value and return
       if (strcmp(current_pair->key, key) == 0)
       {
-        destroy_pair(current_pair);
-        current_pair = new_pair;
+        current_pair->value = value;
         return;
       }
       // if the key at current_pair key is different from the key arg, move onto next in LinkedPair chain
@@ -123,7 +122,7 @@ void hash_table_insert(HashTable *ht, char *key, char *value)
       }
     }
     // if no key matches were found in LinkedPair chain, add onto LinkedPair chain
-    current_pair = new_pair;
+    last_pair->next = new_pair;
   }
   else
   {
@@ -252,13 +251,12 @@ HashTable *hash_table_resize(HashTable *ht)
     // if there is a value in ht->storage
     if (ht->storage[i])
     {
-      new_ht->storage[i] = ht->storage[i];
+      hash_table_insert(new_ht, ht->storage[i]->key, ht->storage[i]->value);
       // if there is a LinkedPair chain, go down chain copying and values to new_ht
       while (ht->storage[i]->next)
       {
-        new_ht->storage[i]->next = ht->storage[i]->next;
+        hash_table_insert(new_ht, ht->storage[i]->next->key, ht->storage[i]->next->value);
         ht->storage[i] = ht->storage[i]->next;
-        new_ht->storage[i] = new_ht->storage[i]->next;
       }
     }
   }
