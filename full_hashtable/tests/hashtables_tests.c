@@ -40,7 +40,7 @@ char *test_hash_table_insertion_and_retrieval()
     return_value = hash_table_retrieve(ht, "key-9");
     mu_assert(strcmp(return_value, "val-9") == 0, "Value is not stored correctly");
 
-    return NULL; 
+    return NULL;
 }
 
 char *test_hash_table_insertion_overwrites_correctly()
@@ -80,7 +80,7 @@ char *test_hash_table_insertion_overwrites_correctly()
     mu_assert(strcmp(hash_table_retrieve(ht, "key-8"), "new-val-8") == 0, "Value is not overwritten correctly");
     mu_assert(strcmp(hash_table_retrieve(ht, "key-9"), "new-val-9") == 0, "Value is not overwritten correctly");
 
-    return NULL; 
+    return NULL;
 }
 
 char *test_hash_table_removes_correctly()
@@ -99,15 +99,25 @@ char *test_hash_table_removes_correctly()
     hash_table_insert(ht, "key-9", "val-9");
 
     hash_table_remove(ht, "key-9");
+    printf("Key-9 Value: %s\n", hash_table_retrieve(ht, "key-9"));
     hash_table_remove(ht, "key-8");
+    printf("Key-8 Value: %s\n", hash_table_retrieve(ht, "key-8"));
     hash_table_remove(ht, "key-7");
+    printf("Key-7 Value: %s\n", hash_table_retrieve(ht, "key-7"));
     hash_table_remove(ht, "key-6");
+    printf("Key-6 Value: %s\n", hash_table_retrieve(ht, "key-6"));
     hash_table_remove(ht, "key-5");
+    printf("Key-5 Value: %s\n", hash_table_retrieve(ht, "key-5"));
     hash_table_remove(ht, "key-4");
+    printf("Key-4 Value: %s\n", hash_table_retrieve(ht, "key-4"));
     hash_table_remove(ht, "key-3");
+    printf("Key-3 Value: %s\n", hash_table_retrieve(ht, "key-3"));
     hash_table_remove(ht, "key-2");
+    printf("Key-2 Value: %s\n", hash_table_retrieve(ht, "key-2"));
     hash_table_remove(ht, "key-1");
+    printf("Key-1 Value: %s\n", hash_table_retrieve(ht, "key-1"));
     hash_table_remove(ht, "key-0");
+    printf("Key-0 Value: %s\n", hash_table_retrieve(ht, "key-0"));
 
     mu_assert(hash_table_retrieve(ht, "key-0") == NULL, "Deleted value is not NULL");
     mu_assert(hash_table_retrieve(ht, "key-1") == NULL, "Deleted value is not NULL");
@@ -123,7 +133,8 @@ char *test_hash_table_removes_correctly()
     return NULL;
 }
 
-char *hash_table_resizing_test() {
+char *hash_table_resizing_test()
+{
     struct HashTable *ht = create_hash_table(8);
 
     hash_table_insert(ht, "resize-key-0", "resize-val-0");
@@ -162,6 +173,7 @@ char *all_tests()
     mu_run_test(test_hash_table_insertion_and_retrieval);
     mu_run_test(test_hash_table_insertion_overwrites_correctly);
     mu_run_test(test_hash_table_removes_correctly);
+    mu_run_test(hash_table_resizing_test);
 
     return NULL;
 }

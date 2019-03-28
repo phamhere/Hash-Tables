@@ -9,7 +9,8 @@
   More specifically, the `next` field is a pointer pointing to the the 
   next `LinkedPair` in the list of `LinkedPair` nodes. 
  */
-typedef struct LinkedPair {
+typedef struct LinkedPair
+{
   char *key;
   char *value;
   struct LinkedPair *next;
@@ -18,7 +19,8 @@ typedef struct LinkedPair {
 /*
   Hash table with linked pairs.
  */
-typedef struct HashTable {
+typedef struct HashTable
+{
   int capacity;
   LinkedPair **storage;
 } HashTable;
@@ -41,7 +43,8 @@ LinkedPair *create_pair(char *key, char *value)
  */
 void destroy_pair(LinkedPair *pair)
 {
-  if (pair != NULL) {
+  if (pair != NULL)
+  {
     free(pair->key);
     free(pair->value);
     free(pair);
@@ -57,9 +60,10 @@ unsigned int hash(char *str, int max)
 {
   unsigned long hash = 5381;
   int c;
-  unsigned char * u_str = (unsigned char *)str;
+  unsigned char *u_str = (unsigned char *)str;
 
-  while ((c = *u_str++)) {
+  while ((c = *u_str++))
+  {
     hash = ((hash << 5) + hash) + c;
   }
 
@@ -73,7 +77,9 @@ unsigned int hash(char *str, int max)
  */
 HashTable *create_hash_table(int capacity)
 {
-  HashTable *ht;
+  HashTable *ht = malloc(sizeof(HashTable));
+  ht->capacity = capacity;
+  ht->storage = calloc(capacity, sizeof(LinkedPair *));
 
   return ht;
 }
@@ -85,11 +91,43 @@ HashTable *create_hash_table(int capacity)
   added to the corresponding LinkedPair list.
 
   Inserting values to the same index with existing keys can overwrite
-  the value in th existing LinkedPair list.
+  the value in the existing LinkedPair list.
  */
 void hash_table_insert(HashTable *ht, char *key, char *value)
 {
-
+  // making a new LinkedPair from the key and value arguments
+  LinkedPair *new_pair = create_pair(key, value);
+  // getting the index for storage from the hash function on the key argument
+  unsigned int index = hash(key, ht->capacity);
+  // making a current and last pair to loop through LinkedPair chain
+  LinkedPair *current_pair = ht->storage[index];
+  LinkedPair *last_pair;
+  // unless there is something at the index, assign the storage index with the new pair
+  if (ht->storage[index])
+  {
+    // keep looping while current_pair isn't null
+    while (current_pair)
+    {
+      // if the key at current_pair key is the same as the key arg, overwrite the value and return
+      if (strcmp(current_pair->key, key) == 0)
+      {
+        current_pair->value = value;
+        return;
+      }
+      // if the key at current_pair key is different from the key arg, move onto next in LinkedPair chain
+      else
+      {
+        last_pair = current_pair;
+        current_pair = last_pair->next;
+      }
+    }
+    // if no key matches were found in LinkedPair chain, add onto LinkedPair chain
+    last_pair->next = new_pair;
+  }
+  else
+  {
+    ht->storage[index] = new_pair;
+  }
 }
 
 /*
@@ -102,7 +140,42 @@ void hash_table_insert(HashTable *ht, char *key, char *value)
  */
 void hash_table_remove(HashTable *ht, char *key)
 {
-
+  // getting the index for storage from the hash function on the key argument
+  unsigned int index = hash(key, ht->capacity);
+  // initializing current_pair and last_pair to use in loop to track where in a LinkedPair chain we are
+  LinkedPair *current_pair = ht->storage[index];
+  LinkedPair *last_pair;
+  // looping while current_pair isn't null
+  while (current_pair)
+  {
+    // if the key at current_pair key is the same as the key argument
+    if (strcmp(current_pair->key, key) == 0)
+    {
+      // if the current_pair has another value after it
+      if (current_pair->next != NULL)
+      {
+        // if the current_pair is the head of the LinkedPair chain, make the head its next value
+        if (current_pair == ht->storage[index])
+        {
+          ht->storage[index] = current_pair->next;
+        }
+        // if the current_pair is in the middle of a LinkedPair chain, link up the previous and next chain
+        else
+        {
+          last_pair->next = current_pair->next;
+        }
+      }
+      // freeing the space of the current_pair and setting the pointer to null
+      destroy_pair(current_pair);
+      current_pair = NULL;
+    }
+    // if the key at current_pair is different from the key argument, move onto next in LinkedPair chain
+    else
+    {
+      last_pair = current_pair;
+      current_pair = last_pair->next;
+    }
+  }
 }
 
 /*
@@ -115,6 +188,23 @@ void hash_table_remove(HashTable *ht, char *key)
  */
 char *hash_table_retrieve(HashTable *ht, char *key)
 {
+  // getting the index for storage from the hash function on the key argument
+  unsigned int index = hash(key, ht->capacity);
+  // looping while ht->storage[index] isn't null
+  while (ht->storage[index])
+  {
+    // if the storage index key matches the key arg, return the value
+    if (strcmp(ht->storage[index]->key, key) == 0)
+    {
+      return ht->storage[index]->value;
+    }
+    // otherwise move onto next in LinkedPair
+    else
+    {
+      ht->storage[index] = ht->storage[index]->next;
+    }
+  }
+  // return null if nothing is found
   return NULL;
 }
 
@@ -125,7 +215,20 @@ char *hash_table_retrieve(HashTable *ht, char *key)
  */
 void destroy_hash_table(HashTable *ht)
 {
-
+  // looping through entire storage
+  for (int i = 0; i < ht->capacity; i++)
+  {
+    // if storage has a value at index i and loops while ht->storage[i] isn't null
+    while (ht->storage[i])
+    {
+      // free up the pair, pair key, and pair value
+      destroy_pair(ht->storage[i]);
+      // moves onto next in LinkedPair chain
+      ht->storage[i] = ht->storage[i]->next;
+    }
+  }
+  free(ht->storage);
+  free(ht);
 }
 
 /*
@@ -138,11 +241,30 @@ void destroy_hash_table(HashTable *ht)
  */
 HashTable *hash_table_resize(HashTable *ht)
 {
-  HashTable *new_ht;
+  // allocating space for new_ht and its storage while assigning its capacity
+  HashTable *new_ht = malloc(sizeof(HashTable));
+  new_ht->capacity = ht->capacity * 2;
+  new_ht->storage = calloc(new_ht->capacity, sizeof(LinkedPair *));
+  // looping through ht->storage and copying values into new_ht->storage
+  for (int i = 0; i < ht->capacity; i++)
+  {
+    // if there is a value in ht->storage
+    if (ht->storage[i])
+    {
+      hash_table_insert(new_ht, ht->storage[i]->key, ht->storage[i]->value);
+      // if there is a LinkedPair chain, go down chain copying and values to new_ht
+      while (ht->storage[i]->next)
+      {
+        hash_table_insert(new_ht, ht->storage[i]->next->key, ht->storage[i]->next->value);
+        ht->storage[i] = ht->storage[i]->next;
+      }
+    }
+  }
+
+  destroy_hash_table(ht);
 
   return new_ht;
 }
-
 
 #ifndef TESTING
 int main(void)
